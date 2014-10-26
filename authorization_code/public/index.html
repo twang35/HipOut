@@ -1,0 +1,735 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>HipOut</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+    <script src="http://code.highcharts.com/modules/solid-gauge.src.js"></script>
+
+    <link rel="stylesheet" href="animate.css">
+    <script src="jquery.lettering.js"></script>
+    <script src="jquery.textillate.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Cuprum' rel='stylesheet' type='text/css'>
+
+    <style type="text/css">
+        #goButton{
+            border-radius: 100px;
+            font-size: 100px;
+            width: 170px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cuprum', sans-serif;
+        }
+        p, div {
+            font-family: 'Cuprum', sans-serif;
+        }
+        #trigger {
+            display: none;
+            text-align: center;
+            padding:20px;
+        }
+        #goBack {
+            display: none;
+            background-color: #81b900;
+            width: 600px;
+        }
+        #goBack:hover {
+            background-color: #96d600;
+        }
+        #login,
+        #loggedin {
+            display: none;
+        }
+        .text-overflow {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 500px;
+        }
+        .chosen_row1 {
+            background-color: #FFCCFF;
+        }
+        .chosen_row2 {
+            background-color: #99CCFF;
+        }
+        #circle {
+            font-size: -webkit-xxx-large;
+            background: #81b900;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+        }
+        #circle:hover {
+            background: #96d600;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<script>
+    var arr1 = [];
+    var arr2 = [];
+    var countdown1 = 10;
+    var countdown2 = 10;
+    function playSong(trackid){$('.artistportrait_wrap').css("display", "none");
+        $('#winner').show();
+      $('#player').html("<iframe src=\"https://embed.spotify.com/?uri=spotify:track:"+trackid+"\" width=\"300\" height=\"380\" frameborder=\"0\" allowtransparency=\"true\"></iframe>");
+      
+    }
+    function get_songs(user_id, playlist_id, flag, token) {
+        $.ajax({
+            url: "https://api.spotify.com/v1/users/" + user_id + "/playlists/" + playlist_id,
+            headers: {
+                "Authorization": "Bearer " + token,
+            },
+            success: function(response) {
+                var total = response.tracks.total;
+                if (total >= 10) {
+                    $('.countdown').show();
+                    $('#user' + flag + ' .playlist_table').empty();
+                    $('#user' + flag + ' .songlist_table').empty();
+                    $.ajax({
+                        url: "https://api.spotify.com/v1/users/" + user_id + "/playlists/" + playlist_id + "/tracks",
+                        headers: {
+                            "Authorization": "Bearer " + token,
+                        },
+                        success: function(response) {
+                            $.each(response.items, function(index, row) {
+                                //each row is a track
+                                $('#user' + flag + ' .songlist_table').append(
+                                    '<tr id="' + row.track.id + '" onclick="songclick(\'' + row.track.id + '\',\'' + row.track.artists[0].id + '\',' + flag + ',\'' + token + '\')"><td>' + row.track.name + '&nbsp&nbsp<i>' + row.track.artists[0].name + '</i></td></tr>'
+                                );
+                            });
+                        },
+                    }).fail(function() {
+                        alert("error fetching user playlists");
+                    });
+                } else {
+                    alert('Please pick a playlist with more than 10 songs!')
+                }
+            }
+        });
+
+
+    }
+
+    function list1() {
+        countdown1 = 10;
+        arr1 = [];
+        $('#countdown_num_1').text(countdown1);
+    }
+
+    function list2() {
+        countdown2 = 10;
+        arr2 = [];
+        $('#countdown_num_2').text(countdown2);
+    }
+
+    function hideInitial() {
+        $('#trigger').hide();
+        $('#list').hide();
+        $('#table').hide();
+    }
+
+    function showGraph() {
+        console.log(arr1);
+        console.log(arr2);
+        var user1 = $('#id_1').val();
+        var user2 = $('#id_2').val();
+        var trackData1 = [];
+        var trackData2 = [];
+        var artistData1 = [];
+        var artistData2 = [];
+        var scoreData1 = [];
+        var scoreData2 = [];
+        var portraitData1 = [];
+        var portraitData2 = [];
+        for (var i = 0; i < arr1.length; i++) {
+            if (arr1[i][4] == 1) {
+                trackData1.push(arr1[i][0]);
+                artistData1.push(arr1[i][1]);
+                scoreData1.push(arr1[i][2]);
+                portraitData1.push(arr1[i][3]);
+            }
+        }
+        for (var i = 0; i < arr2.length; i++) {
+            if (arr2[i][4] == 1) {
+                trackData2.push(arr2[i][0]);
+                artistData2.push(arr2[i][1]);
+                scoreData2.push(arr2[i][2]);
+                portraitData2.push(arr2[i][3]);
+            }
+        }
+        // var scoreData1 = [0.0398647, 0.0837169, 0.0111851, 0.0424111, 0.00411623, 0.0522095, 0.0516872, 0.00073567, 0.0692448, 0.0316075];
+        // var scoreData2 = [0.0738752, 0.00761499, 0.0385334, 0.0912384, 0.0939521, 0.0934044, 0.0122155, 0.0498565, 0.3358214, 0.0565695];
+        // var artistData1 = ["Green Day", "Maroon 5", "Al Green", "Stevie Wonder", "Craig David", "Ann Taylor", "Michael Jackson", "Tony Wang", "Jennifer Laurence", "Kim Taylor"];
+        // var artistData2 = ["Lara Lu", "Ben Chang", "Fei...", "Adam Levine", "No Strings Attached", "Coldplay", "Jay-Z", "Snoop Lion", "Oxapella", "Dooley Noted"];
+        // var portraitData1 = 1;
+        // var portraitData2 = 1;
+
+        var gaugeOptions = {
+            chart: {
+                type: 'solidgauge'
+            },
+            title: null,
+            pane: {
+                center: ['50%', '85%'],
+                size: '140%',
+                startAngle: -90,
+                endAngle: 90,
+                background: {
+                    backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
+                    innerRadius: '60%',
+                    outerRadius: '100%',
+                    shape: 'arc'
+                }
+            },
+            tooltip: {
+                enabled: false
+            },
+            yAxis: {
+                stops: [
+                    [0.1, '#55BF3B'], // green
+                    [0.4, '#DDDF0D'], // yellow
+                    [0.85, '#DF5353'] // red
+                ],
+                lineWidth: 0,
+                minorTickInterval: null,
+                tickPixelInterval: 400,
+                tickWidth: 0,
+                title: {
+                    y: -70
+                },
+                labels: {
+                    y: 16
+                }
+            },
+
+            plotOptions: {
+                solidgauge: {
+                    dataLabels: {
+                        y: 5,
+                        borderWidth: 0,
+                        useHTML: true
+                    }
+                }
+            }
+        };
+        $('#graph #container-User1').highcharts(Highcharts.merge(gaugeOptions, {
+            yAxis: {
+                min: 0,
+                max: 100,
+                title: {
+                    text: user1
+                }
+            },
+
+            credits: {
+                enabled: false
+            },
+
+            series: [{
+                name: 'HIPSCORE',
+                data: [0],
+                dataLabels: {
+                    format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                        ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                        '<span style="font-size:12px;color:silver">HIPSCORE</span></div>'
+                }
+            }]
+
+        }));
+
+        $('#graph #container-User2').highcharts(Highcharts.merge(gaugeOptions, {
+            yAxis: {
+                min: 0,
+                max: 100,
+                title: {
+                    text: user2
+                }
+            },
+
+            credits: {
+                enabled: false
+            },
+
+            series: [{
+                name: 'HIPSCORE',
+                data: [0],
+                dataLabels: {
+                    format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                        ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                        '<span style="font-size:12px;color:silver">HIPSCORE</span></div>'
+                }
+            }]
+
+        }));
+
+        var winner="";
+        var i = 0;
+        var topScore = 0;
+        var topSong = "";
+        var score1=0;
+        var score2=0;
+        var compileData = setInterval(function() {
+
+            if (topScore < scoreData1[i]) {
+                topScore = scoreData1[i];
+                topSong = trackData1[i];
+                
+            }
+            if (topScore < scoreData2[i]) {
+                topScore = scoreData2[i];
+                topSong = trackData2[i];
+                
+            }
+
+            $('#graph #Artist1').fadeIn();
+            $('#graph #ArtistPortrait1').fadeIn();
+            $('#graph #Artist1').text(artistData1[i]);
+            $('#graph #ArtistPortrait1').html("<img align=center style=\"width:50%;\" src='" + portraitData1[i] + "'>");
+            $('#graph #Artist1').fadeOut();
+            $('#graph #ArtistPortrait1').fadeOut();
+            $('#graph #Artist2').fadeIn();
+            $('#graph #ArtistPortrait2').fadeIn();
+            $('#graph #Artist2').text(artistData2[i]);
+            $('#graph #ArtistPortrait2').html("<img style=\"width:50%;\" src='" + portraitData2[i] + "'>");
+            $('#graph #ArtistPortrait2').fadeOut();
+            $('#graph #Artist2').fadeOut();
+
+            if (i == 9) $('#graph #goBack').fadeIn();
+
+            var chart = $('#graph #container-User1').highcharts(),
+                point,
+                newVal,
+                inc;
+
+            if (chart) {
+                point = chart.series[0].points[0];
+                inc = Math.round(scoreData1[i] * 100.0);
+                score1=score1+inc;
+                newVal = point.y + inc;
+
+                if (newVal > 100) {
+                    newVal = 100;
+                }
+
+                point.update(newVal);
+            }
+
+
+            var chart = $('#graph #container-User2').highcharts(),
+                point,
+                newVal,
+                inc;
+
+            if (chart) {
+                point = chart.series[0].points[0];
+                inc = Math.round(scoreData2[i] * 100.0);
+                score2=score2+inc;
+                newVal = point.y + inc;
+
+                if (newVal > 100) {
+                    newVal = 100;
+                }
+                point.update(newVal);
+            }
+            i += 1;
+            if (i > 9) {
+                clearInterval(compileData);
+                if(score1>score2){
+                    winner=user1;
+                }else{
+                    winner=user2;
+                }
+                $('#doge').show();
+                $('#ending').text("Winner is "+winner+"! You are a true hispter!");
+                $('#ending').textillate({
+                    loop: true,
+                    minDisplayTime: 1500,
+                });
+                playSong(topSong);
+            }
+        }, 1000);
+    }
+
+    // $('#id_1').keypress(function(event){
+    //     console.log("hi");
+    //     var keycode = (event.keyCode ? event.keyCode : event.which);
+    //     if(keycode == '13'){
+    //         $('#get_list1').click();   
+    //     }
+    // });     
+
+    //     $('#id_2').keypress(function(event){
+    //     var keycode = (event.keyCode ? event.keyCode : event.which);
+    //     if(keycode == '13'){
+    //         $('#get_list2').click();
+    //     }
+    // });
+
+    function songclick(track_id, artist_id, flag, token) {
+        var countdown = 0;
+        var arr = [];
+        if (flag == 1) {
+            arr = arr1;
+        } else {
+            arr = arr2;
+        }
+
+        var api_key = "EJKKZOCDRDKFGNMEP";
+        var spotify_aritist = "spotify:artist:";
+        var url0 = "https://api.spotify.com/v1/tracks/" + track_id;
+        var url1 = "http://developer.echonest.com/api/v4/artist/familiarity?api_key=" + api_key + "&id=" + spotify_aritist + artist_id + "&format=json";
+        var url2 = "http://developer.echonest.com/api/v4/artist/hotttnesss?api_key=" + api_key + "&id=" + spotify_aritist + artist_id + "&format=json";
+        var familiarity = "";
+        var hotttnesss = "";
+        var song_name = "";
+        var image = "";
+        $.ajax({
+            url: url0,
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            success: function(response) {
+                song_name = response.name;
+                image = response.album.images[0].url;
+                $.ajax({
+                    url: url1,
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function(response) {
+                        familiarity = response.response.artist.familiarity;
+                        $.ajax({
+                            url: url2,
+                            contentType: "application/json",
+                            dataType: "json",
+                            success: function(response) {
+                                hotttnesss = response.response.artist.hotttnesss;
+                                var done = false;
+                                for (var i = 0, l = arr.length; i < l; i++) {
+                                    if (arr[i][0] == track_id) {
+                                        if (arr[i][4] == 1) { //exist
+                                            arr[i][4] = 0;
+                                            $('#trigger').hide();
+                                            if (flag == 1) {
+                                                $('#' + track_id).css("background-color", "transparent");
+                                                countdown1 = countdown1 + 1;
+                                            } else {
+                                                $('#' + track_id).css("background-color", "transparent");
+                                                countdown2 = countdown2 + 1;
+                                            }
+                                        } else { //doesn't exist
+                                            if ((flag == 1 && countdown1 == 0) || (flag == 2 && countdown2 == 0)) {
+                                                alert("You can only pick 10 songs! Unpick something to pick something else;)");
+                                            } else {
+                                                arr[i][4] = 1;
+                                                if (flag == 1) {
+                                                    var color = (16773375 - Math.floor((Math.random()) * 50)).toString(16);
+                                                    $('#' + track_id).css("background-color", "#" + color);
+                                                    countdown1 = countdown1 - 1;
+                                                } else {
+                                                    var color = (14741759 - Math.floor((Math.random()) * 50)).toString(16);
+                                                    $('#' + track_id).css("background-color", "#" + color);
+                                                    countdown2 = countdown2 - 1;
+                                                }
+                                                if (countdown1 == 0 && countdown2 == 0) {
+                                                    $('#trigger').show();
+                                                    $('#trigger').html("<button id=\"goButton\" class=\"btn btn-lg btn-success\" onclick=\"showGraph(); hideInitial();\">GO</button>");
+                                                }
+                                            }
+                                        }
+                                        done = true;
+                                        break;
+                                    }
+                                }
+                                if (done == false) {
+                                    if ((flag == 1 && countdown1 == 0) || (flag == 2 && countdown2 == 0)) {
+                                        alert("You can only pick 10 songs! Unpick something to pick something else;)");
+                                    } else {
+                                        var score = ((0.85 * (1 - familiarity) + 0.15 * hotttnesss) - 0.2) / 0.6 / 8.0;
+                                        console.log(song_name, familiarity, hotttnesss);
+                                        arr.push([track_id, song_name, score, image, 1]);
+                                        if (flag == 1) {
+                                            var color = (16773375 - Math.floor((Math.random()) * 50)).toString(16);
+                                            $('#' + track_id).css("background-color", "#" + color);
+                                            countdown1 = countdown1 - 1;
+                                        } else {
+                                            var color = (14741759 - Math.floor((Math.random()) * 50)).toString(16);
+                                            $('#' + track_id).css("background-color", "#" + color);
+                                            countdown2 = countdown2 - 1;
+                                        }
+                                        if (countdown1 == 0 && countdown2 == 0) {
+                                            $('#trigger').show();
+                                            $('#trigger').html("<button id=\"goButton\" class=\"btn btn-lg btn-success\" onclick=\"showGraph(); hideInitial();\">GO</button>");
+                                        }
+                                    }
+                                }
+                                $('#countdown_num_1').text(countdown1);
+                                $('#countdown_num_2').text(countdown2);
+                            },
+                        })
+                    },
+                })
+            }
+        })
+
+
+
+    }
+</script>
+
+<body role="document">
+    <div class="container" role="main">
+        <header id="Header">        
+             <h1>HipOut</h1>
+
+         </header> 
+        <div id="login">
+            <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+        </div>
+        <div id="loggedin">
+            <div id="user-profile">
+            </div>
+            <div id="oauth">
+            </div>
+            <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
+        </div>
+
+        <div class="row" id="trigger"></div>
+
+        <div class="row" id="list" style="padding-top:10px">
+            <div class="col-md-6 col-sm-6">
+                <div class="col-md-10 col-sm-10">
+                    <input type="text" class="form-control" id="id_1" placeholder="ThinksTheyAreA Hipsta(Spotify Userid1)" >
+                </div>
+                <div class="col-md-2 col-sm-2">
+                    <button class="btn btn-default" id="get_list1" onclick="list1()">get list</button>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <div class="col-md-10 col-sm-10">
+                    <input type="text" class="form-control" id="id_2" placeholder="Wannabe Hipst3r(Spotify Userid2)">
+                </div>
+                <div class="col-md-2 col-sm-2">
+                    <button class="btn btn-default" id="get_list2" onclick="list2()">get list</button>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="table">
+            <div id="user1" class="col-md-6 col-sm-6" style="padding-top:20px;">
+                <table class="table table-hover playlist_table">
+                </table>
+                <div class="countdown" style="display:none; padding-bottom: 20px;">You can pick <span id="countdown_num_1" style="color:red;">10</span> more songs!</div>
+                <table class="table songlist_table">
+                </table>
+            </div>
+            <div id="user2" class="col-md-6 col-sm-6" style="padding-top:20px;">
+                <table class="table table-hover playlist_table">
+                </table>
+                <div class="countdown" style="display:none; padding-bottom: 20px;">You can pick <span id="countdown_num_2" style="color:red;">10</span> more songs!</div>
+                <table class="table songlist_table">
+                </table>
+            </div>
+        </div>
+        
+        <div id="graph">
+            <div class="row" >
+                <div class="col-md-12 col-sm-12" style="text-align: center;">
+                    <h2 id="ending" style="color: #7519D1;" data-in-effect="bounceIn" data-out-effect="bounceIn"></h2>
+                </div>
+                <div class="col-md-12 col-sm-12" id="doge" style="text-align: center; display:none;">
+                    <img src="hipster-dog.png" style="width:50%; "></img>
+                </div>
+            </div>
+             <div class="row" id="winner" style="display:none;">
+                <div class="col-md-12 col-sm-12" style="text-align: center; "><h3 style="color: #7519D1;">WINNING SONG</h3></div>
+             </div>
+            <div class="row" style="text-align: center;">
+                <div id="player"></div>
+            </div>
+            <div class="row artistportrait_wrap" style="width: 600px; text-align:center;height: 150px; margin: 0 auto">
+                <div class="col-md-6 col-sm-6" id="ArtistPortrait1" style="width: 300px; height: 150px; float: left"></div>
+                <div class="col-md-6 col-sm-6" id="ArtistPortrait2" style="width: 300px; height: 150px; float: left"></div>
+            </div>
+            <div style="width: 600px; height: 75px; margin: 0 auto" class="artistportrait_wrap">
+                <div id="Artist1" style="font-size:x-large;text-align:center;width: 300px; height: 75px; float: left"></div>
+                <div id="Artist2" style="font-size:x-large;text-align:center;width: 300px; height: 75px; float: left"></div>
+            </div>
+            <div style="width: 600px; height: 200px; margin: 0 auto">
+                <div id="container-User1" style="width: 300px; height: 200px; float: left"></div>
+                <div id="container-User2" style="width: 300px; height: 200px; float: left"></div>
+            </div>
+            <div style="width: 600px; margin: 0 auto; margin-bottom: 50px;">
+                <button id="goBack" class="btn btn-block btn-lg" style="color: #ffffff; " onClick="history.go(0)">Play Again</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <script id="user-profile-template" type="text/x-handlebars-template">
+        <h1>Logged in as {{display_name}}</h1>
+        <div class="media">
+            <div class="pull-left">
+                <img class="media-object" width="150" src="{{images.0.url}}" />
+            </div>
+            <div class="media-body">
+                <dl class="dl-horizontal">
+                    <dt>Display name</dt>
+                    <dd class="clearfix">{{display_name}}</dd>
+                    <dt>Id</dt>
+                    <dd>{{id}}</dd>
+                    <dt>Email</dt>
+                    <dd>{{email}}</dd>
+                    <dt>Spotify URI</dt>
+                    <dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a>
+                    </dd>
+                    <dt>Link</dt>
+                    <dd><a href="{{href}}">{{href}}</a>
+                    </dd>
+                    <dt>Profile Image</dt>
+                    <dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a>
+                    </dd>
+                    <dt>Country</dt>
+                    <dd>{{country}}</dd>
+                </dl>
+            </div>
+        </div>
+    </script>
+
+    <script id="oauth-template" type="text/x-handlebars-template">
+        <h2>oAuth info</h2>
+        <dl class="dl-horizontal">
+            <dt>Access token</dt>
+            <dd class="text-overflow">{{access_token}}</dd>
+            <dt>Refresh token</dt>
+            <dd class="text-overflow">{{refresh_token}}></dd>
+        </dl>
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+
+    <script>
+        (function() {
+            /**
+             * Obtains parameters from the hash of the URL
+             * @return Object
+             */
+            function getHashParams() {
+                var hashParams = {};
+                var e, r = /([^&;=]+)=?([^&;]*)/g,
+                    q = window.location.hash.substring(1);
+                while (e = r.exec(q)) {
+                    hashParams[e[1]] = decodeURIComponent(e[2]);
+                }
+                return hashParams;
+            }
+
+            var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+                userProfileTemplate = Handlebars.compile(userProfileSource),
+                userProfilePlaceholder = document.getElementById('user-profile');
+
+            oauthSource = document.getElementById('oauth-template').innerHTML,
+                oauthTemplate = Handlebars.compile(oauthSource),
+                oauthPlaceholder = document.getElementById('oauth');
+
+            var params = getHashParams();
+
+            var access_token = params.access_token
+            refresh_token = params.refresh_token,
+                error = params.error;
+            var user_id = -1;
+            if (error) {
+                alert('There was an error during the authentication');
+            } else {
+                if (access_token) {
+                    // render oauth info
+                    oauthPlaceholder.innerHTML = oauthTemplate({
+                        access_token: access_token,
+                        refresh_token: refresh_token
+                    });
+
+                    $.ajax({
+                        url: 'https://api.spotify.com/v1/me',
+                        headers: {
+                            'Authorization': 'Bearer ' + access_token
+                        },
+                        success: function(response) {
+                            userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+                            user_id = response.id;
+                            $('#login').hide();
+                            $('#loggedin').hide();
+                        }
+                    });
+                } else {
+                    // render initial screen
+                    $('#login').show();
+                    $('#loggedin').hide();
+                }
+
+                document.getElementById('obtain-new-token').addEventListener('click', function() {
+                    $.ajax({
+                        url: '/refresh_token',
+                        data: {
+                            'refresh_token': refresh_token
+                        }
+                    }).done(function(data) {
+                        access_token = data.access_token;
+                        oauthPlaceholder.innerHTML = oauthTemplate({
+                            access_token: access_token,
+                            refresh_token: refresh_token
+                        });
+                    });
+                }, false);
+                $("#get_list1").click(function() {
+
+                    $('#user1 .songlist_table').empty();
+                    $('#user1 .playlist_table').empty();
+                    var id = $('#id_1').val().trim();
+                    $.ajax({
+                        url: "https://api.spotify.com/v1/users/" + id + "/playlists",
+                        headers: {
+                            "Authorization": "Bearer " + access_token,
+                        },
+                        success: function(response) {
+                            $.each(response.items, function(index, row) {
+                                $('#user1 .playlist_table').append(
+                                    '<tr onclick="get_songs(\'' + id + '\',\'' + row.id + '\', 1, \'' + access_token + '\')"><td>' + row.name + '</td></tr>'
+                                );
+                            });
+                        },
+                    }).fail(function() {
+                        alert("Please enter a valid spitify user id!");
+                    });
+                })
+                $("#get_list2").click(function() {
+                    $('#user2 .songlist_table').empty();
+                    $('#user2 .playlist_table').empty();
+                    var id = $('#id_2').val().trim();
+                    $.ajax({
+                        url: "https://api.spotify.com/v1/users/" + id + "/playlists",
+                        headers: {
+                            "Authorization": "Bearer " + access_token,
+                        },
+                        success: function(response) {
+                            $.each(response.items, function(index, row) {
+                                $('#user2 .playlist_table').append(
+                                    '<tr onclick="get_songs(\'' + id + '\',\'' + row.id + '\', 2, \'' + access_token + '\')"><td>' + row.name + '</td></tr>'
+                                );
+                            });
+                        },
+                    }).fail(function() {
+                        alert("Please enter a valid spitify user id!");
+                    });
+                })
+
+            }
+        })();
+    </script>
+
+</html>

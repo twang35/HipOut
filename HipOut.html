@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<style>
+button {
+  background-color: #81b900;
+  width: 600px;
+
+}
+  button:hover {
+    background-color: #96d600;
+}
+
+
+</style>
+    <title>Hip Out</title>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <script src="http://cdn.kendostatic.com/2014.2.716/js/jquery.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+
+    <script src="http://code.highcharts.com/modules/solid-gauge.src.js"></script>
+    <div style="width: 600px; height: 150px; margin: 0 auto">
+        <div id="ArtistPortrait1" style="width: 300px; height: 150px; float: left"></div>
+        <div id="ArtistPortrait2" style="width: 300px; height: 150px; float: left"></div>
+    </div>
+    <div style="width: 600px; height: 50px; margin: 0 auto">
+        <div id="Artist1" style="font-size:xx-large;padding-left:50px;width: 300px; height: 50px; float: left"></div>
+        <div id="Artist2" style="font-size:xx-large;padding-left:50px;width: 300px; height: 50px; float: left"></div>
+    </div>
+    <div style="width: 600px; height: 200px; margin: 0 auto">
+        <div id="container-User1" style="width: 300px; height: 200px; float: left"></div>
+        <div id="container-User2" style="width: 300px; height: 200px; float: left"></div>
+    </div>
+    <div style="width: 600px; margin: 0 auto">
+        <button id="goBack" class="btn btn-block btn-lg" style="color: #ffffff">Go back to Playlist Page</button>
+    </div>
+    
+</head>
+
+<body>
+    <script>
+        $(function() {
+            $('#goBack').hide();
+
+            var user1 = "Tony";
+            var user2 = "Laura";
+            var scoreData1 = [0.0398647, 0.0837169, 0.0111851, 0.0424111, 0.00411623, 0.0522095, 0.0516872, 0.00073567, 0.0692448, 0.0316075];
+            var scoreData2 = [0.0738752, 0.00761499, 0.0385334, 0.0912384, 0.0939521, 0.0934044, 0.0122155, 0.0498565, 0.3358214, 0.0565695];
+            var artistData1 = ["Green Day", "Maroon 5", "Al Green", "Stevie Wonder", "Craig David", "Ann Taylor", "Michael Jackson", "Tony Wang", "Jennifer Laurence", "Kim Taylor"];
+            var artistData2 = ["Lara Lu", "Ben Chang", "Fei...", "Adam Levine", "No Strings Attached", "Coldplay", "Jay-Z", "Snoop Lion", "Oxapella", "Dooley Noted"];
+            // var portraitData1 = 1;
+            // var portraitData2 = 1;
+
+            var gaugeOptions = {
+                chart: {
+                    type: 'solidgauge'
+                },
+                title: null,
+                pane: {
+                    center: ['50%', '85%'],
+                    size: '140%',
+                    startAngle: -90,
+                    endAngle: 90,
+                    background: {
+                        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
+                        innerRadius: '60%',
+                        outerRadius: '100%',
+                        shape: 'arc'
+                    }
+                },
+                tooltip: {
+                    enabled: false
+                },
+                yAxis: {
+                    stops: [
+                        [0.1, '#55BF3B'], // green
+                        [0.4, '#DDDF0D'], // yellow
+                        [0.85, '#DF5353'] // red
+                    ],
+                    lineWidth: 0,
+                    minorTickInterval: null,
+                    tickPixelInterval: 400,
+                    tickWidth: 0,
+                    title: {
+                        y: -70
+                    },
+                    labels: {
+                        y: 16
+                    }
+                },
+
+                plotOptions: {
+                    solidgauge: {
+                        dataLabels: {
+                            y: 5,
+                            borderWidth: 0,
+                            useHTML: true
+                        }
+                    }
+                }
+            };
+            $('#container-User1').highcharts(Highcharts.merge(gaugeOptions, {
+                yAxis: {
+                    min: 0,
+                    max: 100,
+                    title: {
+                        text: user1
+                    }
+                },
+
+                credits: {
+                    enabled: false
+                },
+
+                series: [{
+                    name: 'HOTTNESS',
+                    data: [0],
+                    dataLabels: {
+                        format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                            ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                            '<span style="font-size:12px;color:silver">HOTTNESS</span></div>'
+                    }
+                }]
+
+            }));
+
+            $('#container-User2').highcharts(Highcharts.merge(gaugeOptions, {
+                yAxis: {
+                    min: 0,
+                    max: 100,
+                    title: {
+                        text: user2
+                    }
+                },
+
+                credits: {
+                    enabled: false
+                },
+
+                series: [{
+                    name: 'HOTTNESS',
+                    data: [0],
+                    dataLabels: {
+                        format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                            ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                            '<span style="font-size:12px;color:silver">HOTTNESS</span></div>'
+                    }
+                }]
+
+            }));
+
+
+            var i = 0;
+            var compileData = setInterval(function() {
+
+                $('#Artist1').fadeIn();
+                $('#Artist1').text(artistData1[i]);
+
+
+
+
+
+                $('#Artist1').fadeOut();
+
+                $('#Artist2').fadeIn();
+                $('#Artist2').text(artistData2[i]);
+                $('#Artist2').fadeOut();
+                if (i == 9) $('#goBack').fadeIn();
+
+                var chart = $('#container-User1').highcharts(),
+                    point,
+                    newVal,
+                    inc;
+
+                if (chart) {
+                    point = chart.series[0].points[0];
+                    inc = Math.round(scoreData1[i] * 100);
+                    newVal = point.y + inc;
+
+                    if (newVal > 100) {
+                        newVal = 100;
+                    }
+
+                    point.update(newVal);
+                }
+
+
+                var chart = $('#container-User2').highcharts(),
+                    point,
+                    newVal,
+                    inc;
+
+                if (chart) {
+                    point = chart.series[0].points[0];
+                    inc = Math.round(scoreData2[i] * 100);
+                    newVal = point.y + inc;
+
+                    if (newVal > 100) {
+                        newVal = 100;
+                    }
+                    point.update(newVal);
+                }
+                i += 1;
+                if (i > 9) {
+                    clearInterval(compileData);
+                }
+            }, 1000);
+
+
+        });
+    </script>
+</body>
+
+</html>
